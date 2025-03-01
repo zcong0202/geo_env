@@ -1,3 +1,4 @@
+
 # Import required libraries
 import xarray as xr
 import numpy as np
@@ -107,12 +108,12 @@ plt.xlabel('Time (UTC)')
 plt.ylabel('Brightness Temperature (°C)')
 plt.show()
 
-
+# ============= Add the following code to calculate rainfall =============
 
 # Define AutoEstimator relationship parameters
-A = 1.1183e11  
-b = 3.6382e-2  
-c = 1.2        
+A = 1.1183e11  # mm/h
+b = 3.6382e-2  # K^-1
+c = 1.2        # dimensionless
 
 # Convert temperature from Celsius back to Kelvin
 jeddah_temps_kelvin = [temp + 273.15 for temp in jeddah_temps]
@@ -141,8 +142,56 @@ plt.scatter(max_rainfall_time, max_rainfall, color='red', s=100, zorder=5,
            label=f'Maximum Rainfall: {max_rainfall:.4f} mm/h at {max_rainfall_time}')
 plt.xlabel('Time (UTC)')
 plt.ylabel('Rainfall Rate (mm/h)')
+plt.title('Estimated Rainfall Rate Time Series at Jeddah\'s Location on 2009-11-25')
+plt.grid(True)
 plt.legend()
 plt.xticks(rotation=45)
 plt.tight_layout()
 plt.show()
 
+# Process 06:00 UTC data specifically
+# Load the 06:00 data file
+file_path_06 = r'C:\Users\congz\OneDrive - KAUST\Desktop(DELL)\Erse316\ERSE316 ASSIGNMENT\AS5\data\GRIDSAT-B1.2009.11.25.06.v02r01.nc'
+
+try:
+    # Load dataset
+    dset_06 = xr.open_dataset(file_path_06)
+    
+    # Load infrared data
+    IR_06 = np.array(dset_06.variables['irwin_cdr']).squeeze()
+    
+    # Flip data to correct orientation
+    IR_06 = np.flipud(IR_06)
+    
+    # Apply scale and offset to get brightness temperatures in kelvin
+    IR_06_kelvin = IR_06*0.01+200
+    
+    # Convert to Celsius (for visualization)
+    IR_06_celsius = IR_06_kelvin-273.15
+    
+    # Plot brightness temperature distribution at 06:00 UTC
+    plt.figure(figsize=(12, 8))
+    plt.imshow(IR_06_celsius, extent=[-180.035, 180.035, -70.035, 70.035], aspect='auto', cmap='jet')
+    cbar = plt.colorbar()
+    cbar.set_label('Brightness Temperature (°C)')
+    plt.scatter(jeddah_lon, jeddah_lat, color='white', marker='o', s=50, label='Jeddah')
+    plt.title('Brightness Temperature at 2009-11-25 06:00 UTC')
+    plt.legend()
+    plt.grid(False)
+    plt.show()
+    
+    # Calculate rainfall rate for 06:00 UTC using AutoEstimator formula
+    rainfall_map_06 = A * np.exp(-b * (IR_06_kelvin**c))
+    
+    # Plot rainfall rate map for 06:00 UTC (log scale)
+    plt.figure(figsize=(12, 8))
+    log_rainfall_06 = np.log10(rainfall_map_06 + 0.01)  # Add 0.01 to avoid log(0)
+    
+    plt.imshow(log_rainfall_06, extent=[-180.035, 180.035, -70.035, 70.035], aspect='auto', cmap='Blues')
+    plt.colorbar(label='Log10(Rainfall Rate + 0.01) (mm/h)')
+    plt.scatter(jeddah_lon, jeddah_lat, color='red', marker='o', s=50, label='Jeddah')
+    plt.title('Estimated Rainfall Rate at 2009-11-25 06:00 UTC (log scale)')
+    plt.legend()
+    plt.grid(False)
+    plt.show()
+    
