@@ -71,7 +71,6 @@ print(df_era5.head())
 # 7. Plot the time series
 plt.figure(figsize=(12, 6))
 df_era5.plot()
-plt.title('ERA5 Temperature and Precipitation Time Series')
 plt.xlabel('Time')
 plt.ylabel('Value (°C for t2m, mm/h for tp)')
 plt.grid(True)
@@ -88,10 +87,9 @@ print(annual_precip)
 print(f"\nMean annual precipitation: {mean_annual_precip:.2f} mm/year")
 
 # Visualize annual precipitation
-plt.figure(figsize=(10, 5))
+plt.figure(figsize=(8, 5))
 annual_precip.plot(kind='bar')
 plt.axhline(y=mean_annual_precip, color='r', linestyle='-', label=f'Mean: {mean_annual_precip:.2f} mm/year')
-plt.title('Annual Precipitation')
 plt.xlabel('Year')
 plt.ylabel('Precipitation (mm/year)')
 plt.legend()
@@ -118,7 +116,6 @@ ts_index = df_era5['t2m'].resample('D').mean().index
 
 plt.figure(figsize=(12, 6))
 plt.plot(ts_index, pe, label='Potential Evaporation')
-plt.title('Daily Potential Evaporation (Hargreaves-Samani Method)')
 plt.xlabel('Time')
 plt.ylabel('Potential evaporation (mm d⁻¹)')
 plt.grid(True)
